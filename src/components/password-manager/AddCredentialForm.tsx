@@ -43,7 +43,7 @@ export function AddCredentialForm({
   editCredential 
 }: AddCredentialFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Added to track submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,14 +57,12 @@ export function AddCredentialForm({
   // Update form values when editCredential changes
   useEffect(() => {
     if (editCredential) {
-      // Reset form with editCredential values to ensure all fields are pre-filled
       form.reset({
         name: editCredential.name,
         username: editCredential.username,
         password: editCredential.password,
       });
     } else {
-      // Reset form to empty values when not editing
       form.reset({
         name: "",
         username: "",
@@ -74,25 +72,31 @@ export function AddCredentialForm({
   }, [editCredential, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true); // Set loading state
+    setIsSubmitting(true);
     try {
       await onSave({
         name: values.name,
         username: values.username,
         password: values.password,
       });
-      // Do not reset form here; reset in onClose after successful save
+      // Reset form after successful save for new credentials
+      if (!editCredential) {
+        form.reset({
+          name: "",
+          username: "",
+          password: "",
+        });
+      }
     } catch (error) {
-      console.error("Error saving credential:", error);
+      // Error is handled in usePasswordManager.ts via toast
     } finally {
-      setIsSubmitting(false); // Clear loading state
+      setIsSubmitting(false);
     }
   }
 
-  // Modified to reset form only when dialog closes after successful save
   const handleClose = () => {
     if (!isSubmitting) {
-      form.reset(); // Reset form when closing the dialog
+      form.reset();
       setShowPassword(false);
       onClose();
     }
