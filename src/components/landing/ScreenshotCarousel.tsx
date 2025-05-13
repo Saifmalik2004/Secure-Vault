@@ -4,45 +4,72 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  CarouselApi,
 } from "@/components/ui/carousel";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function ScreenshotCarousel() {
   const screenshots = [
     {
-      src: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+      src: "/password1.png",
       alt: "Password Manager Dashboard",
-      title: "Password Manager"
+      title: "Password Manager",
     },
     {
-      src: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+      src: "/notes.png",
       alt: "Notes Organization",
-      title: "Smart Notes"
+      title: "Smart Notes",
     },
     {
       src: "https://images.unsplash.com/photo-1531297484001-80022131f5a1",
       alt: "Project Management",
-      title: "Project Tracker"
+      title: "Project Tracker",
     },
     {
-      src: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
+      src: "/code.png",
       alt: "Code Snippet Manager",
-      title: "Code Vault"
-    }
+      title: "Code Vault",
+    },
   ];
 
   const nextButtonRef = useRef(null);
+  const [api, setApi] = useState<CarouselApi | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+
+    // Update current slide when carousel changes
+    const handleSelect = () => {
+      setCurrentSlide(api.selectedScrollSnap());
+    };
+
+    api.on("select", handleSelect);
+    return () => {
+      api.off("select", handleSelect);
+    };
+  }, [api]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (nextButtonRef.current) {
-        nextButtonRef.current.click();
-      }
-    }, 5000); // Move to next slide every 5 seconds
+      if (api) {
+        const totalSlides = screenshots.length;
+        const nextSlide = (currentSlide + 1) % totalSlides;
 
-    return () => clearInterval(interval); // Clear interval on component unmount
-  }, []);
+        if (nextSlide === 0) {
+          // Reached the end, loop back to first slide
+          api.scrollTo(0);
+        } else {
+          // Move to next slide
+          api.scrollNext();
+        }
+
+        setCurrentSlide(nextSlide);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [api, currentSlide, screenshots.length]);
 
   return (
     <section className="py-16 px-4">
@@ -56,19 +83,22 @@ export function ScreenshotCarousel() {
           </p>
         </div>
 
-        <Carousel className="w-full max-w-5xl mx-auto">
-          <CarouselContent>
+        <Carousel setApi={setApi} className="w-full max-w-5xl mx-auto">
+          <CarouselContent className="max-h-none">
             {screenshots.map((screenshot, index) => (
-              <CarouselItem key={index}>
+              <CarouselItem key={index} className="max-h-none">
                 <div className="p-1">
-                  <div className="overflow-hidden rounded-xl border">
-                    <AspectRatio ratio={16 / 9} className="bg-muted">
+                  <div className="rounded-xl border">
+                    <div className="bg-muted">
                       <img
                         src={screenshot.src}
                         alt={screenshot.alt}
-                        className="object-cover w-full h-full"
+                        className="w-full h-auto object-contain max-h-[70vh]"
+                        onError={(e) => {
+                          e.currentTarget.src = "https://via.placeholder.com/800x450?text=Image+Not+Found";
+                        }}
                       />
-                    </AspectRatio>
+                    </div>
                     <div className="p-4 bg-card">
                       <h3 className="text-lg font-medium">{screenshot.title}</h3>
                       <p className="text-sm text-muted-foreground">{screenshot.alt}</p>
@@ -79,11 +109,8 @@ export function ScreenshotCarousel() {
             ))}
           </CarouselContent>
           <div className="flex justify-center mt-8 gap-2">
-            <CarouselPrevious className="relative static transform-none mx-2" />
-            <CarouselNext
-              ref={nextButtonRef}
-              className="relative static transform-none mx-2"
-            />
+            <CarouselPrevious className="mx-2" />
+            <CarouselNext ref={nextButtonRef} className="mx-2" />
           </div>
         </Carousel>
       </div>
