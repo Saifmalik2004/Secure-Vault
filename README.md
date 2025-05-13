@@ -100,7 +100,9 @@ npm run dev
 Create a `.env` file and add:
 
 VITE_SUPABASE_URL=add your URL.
+
 VITE_SUPABASE_PUBLISHABLE_KEY=add your key here.
+
 VITE_SUPABASE_PROJECT_ID=add your id here.
 
 ---
