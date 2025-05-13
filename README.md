@@ -10,10 +10,7 @@
 ## 📚 Table of Contents
 
 * [Features](#features)
-* [Tech Stack](#tech-stack)
-* [Screenshots](#screenshots)
 * [Installation](#installation)
-* [Usage Guide](#usage-guide)
 * [Environment Variables](#environment-variables)
 * [License](#license)
 
@@ -27,11 +24,13 @@
 * Passwords are **encrypted** in the database
 * **PIN-protected** access for copy/edit/delete actions
 * PIN is stored securely in **hashed** form
+![Home Page](./public/password1.png)
 
 ### 📝 Notes Section
 
 * Add and manage secure notes
 * Ideal for saving private thoughts or important information
+![Home Page](./public/notes.png)
 
 
 ### 🔗 Private Link Vault
@@ -39,12 +38,14 @@
 * Save and categorize **private/important links**
 * Easy to access and search
 * Visibility toggle for privacy
+![Home Page](./public/Links.png)
 
 ### 🤖 AI  Library
 
 * Collection of **200+ AI ** to enhance productivity
 * Search  by keyword 
 * Great for creators, developers, and power users
+
 
 ### ⏱️ Productivity Tools
 
@@ -56,6 +57,7 @@
 * Set and manage **daily goals**
 * Track and log **skills** you're working on
 * Stay accountable and productive
+![Home Page](./public/goal.png)
 
 ### 🐞 Bug/Error Logger
 
