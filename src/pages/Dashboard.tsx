@@ -20,21 +20,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { hashPin } from "@/lib/encryption";
 
-const quotes = [
-  "The only way to do great work is to love what you do. - Steve Jobs",
-  "It always seems impossible until it's done. - Nelson Mandela",
-  "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
-  "Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill",
-  "Believe you can and you're halfway there. - Theodore Roosevelt",
-  "Your time is limited, don't waste it living someone else's life. - Steve Jobs",
-  "The best way to predict the future is to invent it. - Alan Kay",
-  "The secret of getting ahead is getting started. - Mark Twain",
-  "Don't watch the clock; do what it does. Keep going. - Sam Levenson",
-  "The harder you work for something, the greater you'll feel when you achieve it. - Unknown"
-];
-
 export default function Dashboard() {
-  const [quote, setQuote] = useState("");
   const [pinConfigured, setPinConfigured] = useState(false);
   const [noteCount, setNoteCount] = useState(0);
   const [credentialCount, setCredentialCount] = useState(0);
@@ -84,9 +70,6 @@ export default function Dashboard() {
         }
 
         // Fetch dashboard data
-        const randomIndex = Math.floor(Math.random() * quotes.length);
-        setQuote(quotes[randomIndex]);
-
         const fetchCounts = async () => {
           const tables = [
             { table: 'secure_notes', setter: setNoteCount },
@@ -190,8 +173,6 @@ export default function Dashboard() {
     setConfirmPin("");
   };
 
-  
-
   return (
     <>
       <AlertDialog open={showPinDialog} onOpenChange={() => {}}>
@@ -237,7 +218,7 @@ export default function Dashboard() {
             <p className="text-muted-foreground dark:text-muted-foreground/80">Your personal productivity and privacy-focused management system</p>
           </div>
           
-          <QuoteCard quote={quote} />
+          <QuoteCard />
           
           {!pinConfigured && <SecurityAlert />}
           

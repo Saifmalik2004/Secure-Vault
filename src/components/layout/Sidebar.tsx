@@ -105,12 +105,12 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "bg-sidebar text-sidebar-foreground border-r border-border transition-all duration-300 overflow-hidden h-full",
+        "bg-sidebar text-sidebar-foreground border-r border-border transition-all duration-300 h-full flex flex-col",
         open ? "w-64" : "w-0 md:w-16"
       )}
     >
       {/* Header for all screens */}
-      <div className="p-4 h-16 border-b border-border flex items-center justify-between">
+      <div className="p-4 h-16 border-b border-border flex items-center justify-between flex-shrink-0">
         {open && <h1 className="text-xl font-bold">SecureVault</h1>}
         <Button
           variant="ghost"
@@ -121,7 +121,7 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
           {open ? <ArrowLeft size={20} /> : <ArrowRight size={20} />}
         </Button>
       </div>
-      <nav className="flex flex-col gap-1 p-2">
+      <nav className="flex flex-col gap-1 p-2 overflow-y-auto max-h-[calc(100vh-4rem)]">
         {sidebarItems.map((item) => {
           const isActive = location.pathname === item.path;
           
@@ -131,7 +131,6 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
                 <TooltipTrigger asChild>
                   <Link to={item.disabled ? '#' : item.path}>
                     <Button
-                    
                       variant={isActive ? "secondary" : "ghost"}
                       className={cn(
                         "w-full justify-start text-sidebar-foreground",

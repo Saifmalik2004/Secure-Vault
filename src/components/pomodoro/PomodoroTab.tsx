@@ -1,10 +1,10 @@
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, Info } from "lucide-react";
 import { useTimer } from "../../context/TimerContext";
 import { sessions, SessionType, Session } from "../../pages/PomodoroTimer";
 import { useToast } from "@/components/ui/use-toast";
+import { PomodoroInfoDialog } from "./PomodoroInfoDialog";
 
 interface PomodoroTabProps {
   onSwitchToStopwatch: () => void;
@@ -25,6 +25,7 @@ export default function PomodoroTab({ onSwitchToStopwatch }: PomodoroTabProps) {
   } = useTimer();
 
   const { toast } = useToast();
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
 
   // Handle session completion
   useEffect(() => {
@@ -108,112 +109,128 @@ export default function PomodoroTab({ onSwitchToStopwatch }: PomodoroTabProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background dark:bg-background/95 p-4">
-      {/* Tabs */}
-      <div className="flex justify-center gap-4 mb-8">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start bg-background dark:bg-background/95 px-4 pt-0">
+      <div className="relative w-full max-w-3xl">
+        {/* Info Button */}
         <Button
-          variant="default"
-          className="rounded-full text-lg font-semibold transition-all duration-300 bg-red-500 hover:bg-red-600"
+          variant="ghost"
+          size="sm"
+          className="absolute top-2 right-2 z-10 text-muted-foreground hover:text-foreground"
+          onClick={() => setIsInfoDialogOpen(true)}
+          aria-label="Learn about the Pomodoro Technique"
         >
-          Pomodoro
+          <Info className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
-        <Button
-          variant="outline"
-          className="rounded-full text-lg font-semibold transition-all duration-300 border-foreground/20 hover:scale-105"
-          onClick={onSwitchToStopwatch}
-        >
-          Stopwatch
-        </Button>
-      </div>
 
-      {/* Pomodoro Tab */}
-      <div className="flex flex-col items-center">
-        {/* Session Buttons */}
-        <div className="flex justify-center gap-2 mb-6">
-          {Object.keys(sessions).map((sessionType) => (
-            <Button
-              key={sessionType}
-              variant={currentSession.type === sessionType ? "default" : "outline"}
-              className={`rounded-full transition-all duration-300 ${
-                currentSession.type === sessionType
-                  ? sessionType === "pomodoro"
-                    ? "bg-red-500 hover:bg-red-600"
-                    : "bg-green-500 hover:bg-green-600"
-                  : "border-foreground/20 hover:scale-105"
-              }`}
-              onClick={() => handleSessionChange(sessionType as SessionType)}
-            >
-              {sessionType === "pomodoro"
-                ? "Pomodoro"
-                : sessionType === "shortBreak"
-                ? "Short Break"
-                : "Long Break"}
-            </Button>
-          ))}
+        {/* Tabs */}
+        <div className="flex justify-center gap-2 mt-4 mb-4 sm:mb-6">
+          <Button
+            variant="default"
+            className="rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 bg-red-500 hover:bg-red-600 px-2 sm:px-3"
+          >
+            Pomodoro
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 border-foreground/20 hover:scale-105 px-2 sm:px-3"
+            onClick={onSwitchToStopwatch}
+          >
+            Stopwatch
+          </Button>
         </div>
 
-        {/* Circular Timer */}
-        <div className="relative flex justify-center mb-6">
-          <svg className="w-[200px] h-[200px] sm:w-[300px] sm:h-[300px]" viewBox="0 0 300 300">
-            <circle
-              cx="150"
-              cy="150"
-              r={radius}
-              fill="none"
-              stroke="hsl(var(--muted) / 0.2)"
-              strokeWidth="20"
-            />
-            <circle
-              cx="150"
-              cy="150"
-              r={radius}
-              fill="none"
-              stroke={currentSession.color}
-              strokeWidth="20"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-1000 ease-linear"
-              transform="rotate(-90 150 150)"
-            />
-          </svg>
-          <div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl sm:text-5xl font-semibold text-foreground dark:text-foreground"
-            aria-live="polite"
-          >
-            {formatPomodoroTime(pomodoroTime)}
+        {/* Pomodoro Tab */}
+        <div className="flex flex-col items-center">
+          {/* Session Tabs */}
+          <div className="flex justify-center gap-1 sm:gap-2 mb-14 sm:mb-6 flex-wrap">
+            {Object.keys(sessions).map((sessionType) => (
+              <Button
+                key={sessionType}
+                variant={currentSession.type === sessionType ? "default" : "outline"}
+                className={`rounded-full transition-all duration-300 text-xs sm:text-sm px-2 sm:px-3 min-w-fit ${
+                  currentSession.type === sessionType
+                    ? sessionType === "pomodoro"
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-green-500 hover:bg-green-600"
+                    : "border-foreground/20 hover:scale-105"
+                }`}
+                onClick={() => handleSessionChange(sessionType as SessionType)}
+              >
+                {sessionType === "pomodoro"
+                  ? "Pomodoro"
+                  : sessionType === "shortBreak"
+                  ? "Short Break"
+                  : "Long Break"}
+              </Button>
+            ))}
+          </div>
+
+          {/* Circular Timer */}
+          <div className="relative flex justify-center mb-4 sm:mb-6">
+            <svg className="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[280px] md:h-[280px] lg:w-[340px] lg:h-[340px]" viewBox="0 0 300 300">
+              <circle
+                cx="150"
+                cy="150"
+                r={radius}
+                fill="none"
+                stroke="hsl(var(--muted) / 0.2)"
+                strokeWidth="20"
+              />
+              <circle
+                cx="150"
+                cy="150"
+                r={radius}
+                fill="none"
+                stroke={currentSession.color}
+                strokeWidth="20"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                className="transition-all duration-1000 ease-linear"
+                transform="rotate(-90 150 150)"
+              />
+            </svg>
+            <div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl sm:text-5xl md:text-6xl font-semibold text-foreground dark:text-foreground"
+              aria-live="polite"
+            >
+              {formatPomodoroTime(pomodoroTime)}
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex justify-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <Button
+              size="lg"
+              className={`rounded-full transition-all duration-300 text-xs sm:text-base px-2 sm:px-4 ${
+                isPomodoroRunning
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
+              onClick={togglePomodoro}
+            >
+              {isPomodoroRunning ? <Pause className="w-3 sm:w-5 h-3 sm:h-5" /> : <Play className="w-3 sm:w-5 h-3 sm:h-5" />}
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="rounded-full border-foreground/20 hover:scale-105 text-xs sm:text-base px-2 sm:px-4"
+              onClick={resetPomodoro}
+            >
+              <RotateCcw className="w-3 sm:w-5 h-3 sm:h-5" />
+            </Button>
+          </div>
+
+          {/* Session Counter */}
+          <div className="text-center text-muted-foreground dark:text-muted-foreground/80 text-xs sm:text-base mb-0">
+            <p>
+              Cycle {Math.floor(cycleCount / 4) + 1}/4 | Completed Sessions: {completedSessions}
+            </p>
           </div>
         </div>
-
-        {/* Controls */}
-        <div className="flex justify-center gap-4 mb-6">
-          <Button
-            size="lg"
-            className={`rounded-full transition-all duration-300 ${
-              isPomodoroRunning
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-green-500 hover:bg-green-600"
-            }`}
-            onClick={togglePomodoro}
-          >
-            {isPomodoroRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="rounded-full border-foreground/20 hover:scale-105"
-            onClick={resetPomodoro}
-          >
-            <RotateCcw className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Session Counter */}
-        <div className="text-center text-muted-foreground dark:text-muted-foreground/80">
-          <p>
-            Cycle {Math.floor(cycleCount / 4) + 1}/4 | Completed Sessions: {completedSessions}
-          </p>
-        </div>
       </div>
+
+      {/* Info Dialog */}
+      <PomodoroInfoDialog open={isInfoDialogOpen} onOpenChange={setIsInfoDialogOpen} />
     </div>
   );
 }
