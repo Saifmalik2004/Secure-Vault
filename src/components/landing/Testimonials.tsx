@@ -43,39 +43,39 @@ export function Testimonials() {
   ];
 
   return (
-    <section className="py-16 px-4 bg-muted/30 overflow-hidden">
+    <section className="py-12 px-4 bg-muted/30 overflow-hidden">
       <div className="container mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight mb-3 md:text-4xl">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-4xl">
             What Our Users Say
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto text-sm md:text-base">
             Join thousands of developers and students who've streamlined their workflow
           </p>
         </div>
 
-        <div className="relative">
+        <div className="relative overflow-hidden">
           <div className="flex animate-train">
             {[...testimonials, ...testimonials].map((testimonial, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[320px] mx-3"
+                className="flex-shrink-0 w-[260px] sm:w-[280px] md:w-[300px] mx-2 sm:mx-3"
               >
-                <Card className="card-hover h-[280px] flex flex-col">
-                  <CardContent className="pt-6 flex flex-col flex-grow">
-                    <Quote className="h-8 w-8 text-primary/40 mb-4" />
-                    <p className="italic text-muted-foreground mb-6 line-clamp-3 flex-grow">
+                <Card className="card-hover h-[240px] sm:h-[260px] md:h-[280px] flex flex-col">
+                  <CardContent className="pt-4 sm:pt-5 md:pt-6 flex flex-col flex-grow">
+                    <Quote className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-primary/40 mb-2 sm:mb-3 md:mb-4" />
+                    <p className="italic text-muted-foreground text-xs sm:text-sm md:text-base mb-3 sm:mb-4 md:mb-6 line-clamp-3 flex-grow">
                       {testimonial.quote}
                     </p>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <Avatar className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10">
                         <AvatarFallback className="bg-primary/10 text-primary">
                           {testimonial.avatar}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{testimonial.author}</p>
-                        <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                        <p className="font-medium text-xs sm:text-sm md:text-base">{testimonial.author}</p>
+                        <p className="text-xs text-muted-foreground">{testimonial.role}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -86,10 +86,11 @@ export function Testimonials() {
         </div>
       </div>
 
-      <style >{`
+      <style>{`
         .animate-train {
-          animation: train 5s linear infinite;
+          animation: train 30s linear infinite;
           display: flex;
+          width: max-content; /* Ensure container fits all cards */
         }
 
         @keyframes train {
@@ -97,7 +98,13 @@ export function Testimonials() {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-50%);
+            transform: translateX(-50%); /* Move exactly half the total width */
+          }
+        }
+
+        @media (max-width: 640px) {
+          .animate-train {
+            animation: train 25s linear infinite; /* Slightly faster for mobile */
           }
         }
 
@@ -111,6 +118,15 @@ export function Testimonials() {
           -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
+        }
+
+        /* Hide scrollbar for cleaner look */
+        .animate-train::-webkit-scrollbar {
+          display: none;
+        }
+        .animate-train {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </section>
