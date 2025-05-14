@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { 
+import {
   Calendar,
   Cog,
   File,
@@ -22,8 +22,10 @@ import {
   ListCheck,
   Sparkle,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  ChevronDown,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface SidebarProps {
   open: boolean;
@@ -87,6 +89,11 @@ const sidebarItems = [
     icon: <BookOpen size={20} />,
   },
   {
+    name: "Helper Tools",
+    icon: <Code size={20} />,
+    isDropdown: true,
+  },
+  {
     name: "Settings",
     path: "/settings",
     icon: <Cog size={20} />,
@@ -95,13 +102,41 @@ const sidebarItems = [
     name: "Projects",
     path: "/projects",
     icon: <File size={20} />,
-    disabled: true
+    disabled: true,
   },
 ];
 
 export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
   const location = useLocation();
-  
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const devToolsLinks = [
+    { name: "Color Converter", path: "/dev-tools/color-converter" },
+  ];
+
+  // Update isMobile state on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Handle link click to close sidebar on mobile
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setSidebarOpen(false);
+      setDropdownOpen(false);
+    }
+  };
+
+  // Toggle dropdown
+  const toggleDropdown = () => {
+    setDropdownOpen((prev) => !prev);
+  };
+
   return (
     <aside
       className={cn(
@@ -124,12 +159,71 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
       <nav className="flex flex-col gap-1 p-2 overflow-y-auto max-h-[calc(100vh-4rem)]">
         {sidebarItems.map((item) => {
           const isActive = location.pathname === item.path;
-          
+
+          if (item.isDropdown) {
+            return (
+              <TooltipProvider key={item.name}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start text-sidebar-foreground",
+                          !open && "justify-center p-2"
+                        )}
+                        onClick={toggleDropdown}
+                      >
+                        <span className="mr-2">{item.icon}</span>
+                        {open && (
+                          <span className="flex-1 flex items-center justify-between">
+                            {item.name}
+                            <ChevronDown
+                              size={16}
+                              className={cn(
+                                "transition-transform",
+                                dropdownOpen && "rotate-180"
+                              )}
+                            />
+                          </span>
+                        )}
+                      </Button>
+                      {open && dropdownOpen && (
+                        <div className="ml-4 mt-1 flex flex-col gap-1">
+                          {devToolsLinks.map((link, index) => (
+                            <Link
+                              key={index}
+                              to={link.path}
+                              className={cn(
+                                "flex items-center gap-2 p-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent rounded-md",
+                                location.pathname === link.path &&
+                                  "bg-sidebar-accent text-sidebar-accent-foreground"
+                              )}
+                              onClick={handleLinkClick}
+                            >
+                              <LinkIcon size={16} />
+                              {link.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  {!open && (
+                    <TooltipContent side="right">
+                      {item.name}
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+            );
+          }
+
           return (
             <TooltipProvider key={item.path}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link to={item.disabled ? '#' : item.path}>
+                  <Link to={item.disabled ? "#" : item.path} onClick={handleLinkClick}>
                     <Button
                       variant={isActive ? "secondary" : "ghost"}
                       className={cn(
