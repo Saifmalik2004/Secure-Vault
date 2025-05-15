@@ -8,19 +8,18 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
-  Calendar,
-  Cog,
-  File,
   Home,
   Key,
+  File,
   Link as LinkIcon,
   Lightbulb,
+  Sparkle,
+  TimerIcon,
   Code,
   Bug,
-  TimerIcon,
-  BookOpen,
   ListCheck,
-  Sparkle,
+  BookOpen,
+  Cog,
   ArrowLeft,
   ArrowRight,
   ChevronDown,
@@ -32,7 +31,20 @@ interface SidebarProps {
   setSidebarOpen: (value: boolean) => void;
 }
 
-const sidebarItems = [
+interface SidebarItem {
+  name: string;
+  path?: string;
+  icon: JSX.Element;
+  isDropdown?: boolean;
+  disabled?: boolean;
+}
+
+interface DropdownLink {
+  name: string;
+  path: string;
+}
+
+const sidebarItems: SidebarItem[] = [
   {
     name: "Dashboard",
     path: "/dashboard",
@@ -89,8 +101,13 @@ const sidebarItems = [
     icon: <BookOpen size={20} />,
   },
   {
-    name: "Helper Tools",
+    name: "Dev Tools",
     icon: <Code size={20} />,
+    isDropdown: true,
+  },
+  {
+    name: "Cheatsheet",
+    icon: <BookOpen size={20} />,
     isDropdown: true,
   },
   {
@@ -106,13 +123,18 @@ const sidebarItems = [
   },
 ];
 
+const devToolsLinks: DropdownLink[] = [
+  { name: "Color Converter", path: "/dev-tools/color-converter" },
+];
+
+const cheatsheetLinks: DropdownLink[] = [
+  { name: "Linux", path: "/cheatsheet/linux" },
+];
+
 export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const devToolsLinks = [
-    { name: "Color Converter", path: "/dev-tools/color-converter" },
-  ];
+  const [dropdownOpen, setDropdownOpen] = useState<Record<string, boolean>>({});
 
   // Update isMobile state on window resize
   useEffect(() => {
@@ -128,13 +150,16 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
   const handleLinkClick = () => {
     if (isMobile) {
       setSidebarOpen(false);
-      setDropdownOpen(false);
+      setDropdownOpen({});
     }
   };
 
   // Toggle dropdown
-  const toggleDropdown = () => {
-    setDropdownOpen((prev) => !prev);
+  const toggleDropdown = (name: string) => {
+    setDropdownOpen((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
   };
 
   return (
@@ -144,7 +169,7 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
         open ? "w-64" : "w-0 md:w-16"
       )}
     >
-      {/* Header for all screens */}
+      {/* Header */}
       <div className="p-4 h-16 border-b border-border flex items-center justify-between flex-shrink-0">
         {open && <h1 className="text-xl font-bold">SecureVault</h1>}
         <Button
@@ -152,15 +177,19 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
           size="icon"
           className="ml-auto"
           onClick={() => setSidebarOpen(!open)}
+          aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
         >
           {open ? <ArrowLeft size={20} /> : <ArrowRight size={20} />}
         </Button>
       </div>
+
+      {/* Navigation */}
       <nav className="flex flex-col gap-1 p-2 overflow-y-auto max-h-[calc(100vh-4rem)]">
         {sidebarItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = item.path && location.pathname === item.path;
 
           if (item.isDropdown) {
+            const links = item.name === "Dev Tools" ? devToolsLinks : cheatsheetLinks;
             return (
               <TooltipProvider key={item.name}>
                 <Tooltip>
@@ -172,7 +201,9 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
                           "w-full justify-start text-sidebar-foreground",
                           !open && "justify-center p-2"
                         )}
-                        onClick={toggleDropdown}
+                        onClick={() => toggleDropdown(item.name)}
+                        aria-expanded={dropdownOpen[item.name]}
+                        aria-label={`Toggle ${item.name} dropdown`}
                       >
                         <span className="mr-2">{item.icon}</span>
                         {open && (
@@ -182,17 +213,17 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
                               size={16}
                               className={cn(
                                 "transition-transform",
-                                dropdownOpen && "rotate-180"
+                                dropdownOpen[item.name] && "rotate-180"
                               )}
                             />
                           </span>
                         )}
                       </Button>
-                      {open && dropdownOpen && (
+                      {open && dropdownOpen[item.name] && (
                         <div className="ml-4 mt-1 flex flex-col gap-1">
-                          {devToolsLinks.map((link, index) => (
+                          {links.map((link) => (
                             <Link
-                              key={index}
+                              key={link.path}
                               to={link.path}
                               className={cn(
                                 "flex items-center gap-2 p-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent rounded-md",
@@ -210,9 +241,7 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
                     </div>
                   </TooltipTrigger>
                   {!open && (
-                    <TooltipContent side="right">
-                      {item.name}
-                    </TooltipContent>
+                    <TooltipContent side="right">{item.name}</TooltipContent>
                   )}
                 </Tooltip>
               </TooltipProvider>
@@ -220,10 +249,13 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
           }
 
           return (
-            <TooltipProvider key={item.path}>
+            <TooltipProvider key={item.name}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link to={item.disabled ? "#" : item.path} onClick={handleLinkClick}>
+                  <Link
+                    to={item.disabled || !item.path ? "#" : item.path}
+                    onClick={handleLinkClick}
+                  >
                     <Button
                       variant={isActive ? "secondary" : "ghost"}
                       className={cn(
@@ -232,6 +264,7 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
                         isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
                         item.disabled && "opacity-50 pointer-events-none"
                       )}
+                      aria-disabled={item.disabled}
                     >
                       <span className="mr-2">{item.icon}</span>
                       {open && <span>{item.name}</span>}
@@ -239,9 +272,7 @@ export function Sidebar({ open, setSidebarOpen }: SidebarProps) {
                   </Link>
                 </TooltipTrigger>
                 {!open && (
-                  <TooltipContent side="right">
-                    {item.name}
-                  </TooltipContent>
+                  <TooltipContent side="right">{item.name}</TooltipContent>
                 )}
               </Tooltip>
             </TooltipProvider>

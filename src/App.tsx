@@ -26,6 +26,7 @@ import BugLog from "./pages/BugLog";
 import DailyGoals from "./pages/DailyGoals";
 import Skills from "./pages/Skills";
 import { ColorConverter } from "./pages/ColorConverter";
+import { LinuxCheatSheet } from "./pages/cheetsheet/LinuxCheatSheet";
 
 const queryClient = new QueryClient();
 
@@ -91,6 +92,7 @@ const App = () => {
                   <Route path="/skills" element={<Skills />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/dev-tools/color-converter" element={<ColorConverter />} />
+                  <Route path="/cheatsheet/linux" element={<LinuxCheatSheet />} />
                 </Route>
                 <Route
                   path="/pomodoro-timer/stopwatch"
